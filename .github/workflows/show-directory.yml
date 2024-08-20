@@ -1,19 +1,35 @@
-# file: .github/workflows/show-directory.yml
 name: show-directory
-# on – определяет события, которые запускают воркфлоу
+
 on: push
+
 jobs:
-  # build – произвольно выбранное имя задания
-  # их может быть больше одного
   build:
-    # операционная система для работы воркфлоу
     runs-on: ubuntu-latest
-    steps: # список шагов, которые надо выполнить
-      # экшен — выполняет какую-то задачу
-      # checkout — клонирует репозиторий
+
+    steps:
       - uses: actions/checkout@v3
-      # run – произвольная bash-команда
-      # ls -la выведет содержимое текущего репозитория
+
+      # Установка Node.js и включение кеширования для npm
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '14'
+          cache: 'npm'
+
+      # Установка зависимостей
+      - run: npm install
+
+      # Запуск команды setup
       - run: make setup
+
+      # Запуск тестов
       - run: make test
+
+      # Запуск линтера
       - run: make lint
+
+      # Запуск Snyk для проверки уязвимостей
+      - name: Run Snyk to check for vulnerabilities
+        uses: snyk/actions/node@master
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
